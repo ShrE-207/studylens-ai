@@ -9,15 +9,15 @@
 :root{--bg:#f7f7fb;--card:#fff;--ink:#25243a;--muted:#77758b;--accent:#6658d9;--line:#e9e7f2}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px Arial,sans-serif}
-header{background:#fff;border-bottom:1px solid var(--line);padding:18px 5%;display:flex;align-items:center;justify-content:space-between;gap:12px}
+header{background:white;border-bottom:1px solid var(--line);padding:18px 5%;display:flex;justify-content:space-between;align-items:center;gap:12px}
 .logo{font-size:23px;font-weight:800;color:var(--accent)}
 header small{color:var(--muted)}
 main{max-width:1050px;margin:28px auto;padding:0 16px}
 .hero{background:linear-gradient(120deg,#ece9ff,#f8efff);border-radius:22px;padding:30px 24px;margin-bottom:22px}
-.hero h1{font-size:clamp(27px,5vw,40px);margin:0 0 10px}
+.hero h1{font-size:clamp(27px,5vw,40px);margin:12px 0}
 .hero p{color:#615c7a;line-height:1.6}
 .tabs{display:flex;gap:8px;overflow-x:auto;margin:18px 0;padding-bottom:5px}
-.tab{border:1px solid var(--line);background:#fff;border-radius:10px;padding:11px 14px;white-space:nowrap;cursor:pointer}
+.tab{border:1px solid var(--line);background:white;border-radius:10px;padding:11px 14px;white-space:nowrap;cursor:pointer}
 .tab.active,.primary{background:var(--accent);color:white;border-color:var(--accent)}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:20px;min-width:0}
@@ -25,147 +25,334 @@ main{max-width:1050px;margin:28px auto;padding:0 16px}
 .muted{color:var(--muted);line-height:1.6}
 .upload{border:2px dashed #c9c3ed;border-radius:13px;padding:24px 12px;text-align:center;background:#fbfaff}
 button{font:inherit;cursor:pointer;border:1px solid var(--line);border-radius:9px;padding:10px 13px;background:white;color:var(--ink)}
-button:hover{filter:brightness(.97)}
+button:disabled{opacity:.55;cursor:not-allowed}
 .primary{font-weight:600}
-textarea,input[type=file]{width:100%;margin:9px 0;padding:12px;border:1px solid var(--line);border-radius:10px;background:white}
-textarea{min-height:150px;resize:vertical;line-height:1.5}
+input[type=file]{width:100%;margin:12px 0;padding:12px;border:1px solid var(--line);border-radius:10px;background:white}
 .output{white-space:pre-wrap;line-height:1.7;overflow-wrap:anywhere}
 .pill{display:inline-block;background:#eeeaff;color:#5144b6;border-radius:20px;padding:5px 9px;font-size:12px}
 .hidden{display:none}
 .flash{min-height:145px;display:flex;align-items:center;justify-content:center;text-align:center;background:#f3f0ff;border-radius:13px;padding:22px;font-size:19px;line-height:1.5;margin:12px 0}
+.notice{padding:11px 13px;border-radius:10px;background:#fff8df;color:#74591a;margin-top:12px;line-height:1.5}
 footer{text-align:center;padding:28px 12px;color:var(--muted);font-size:12px}
 @media(max-width:650px){.grid{grid-template-columns:1fr}.hero{padding:24px 18px}header{padding:15px 4%}.card{padding:16px}main{margin-top:17px}}
 </style>
 </head>
 <body>
 <header>
-  <div class="logo">✦ StudyLens</div>
-  <small>Your personal study space</small>
+<div class="logo">✦ StudyLens</div>
+<small>Your personal study space</small>
 </header>
+
 <main>
-  <section class="hero">
-    <span class="pill">YOUR STUDY COMPANION</span>
-    <h1>Understand more.<br>Study with clarity.</h1>
-    <p>Turn your study notes into concise revision material, key topics, questions and flashcards.</p>
-    <button class="primary" onclick="document.getElementById('material').scrollIntoView({behavior:'smooth'})">Start studying ↓</button>
-  </section>
+<section class="hero">
+<span class="pill">YOUR STUDY COMPANION</span>
+<h1>Understand more.<br>Study with clarity.</h1>
+<p>Upload a PDF and turn its contents into revision material, key topics, questions and flashcards.</p>
+<button class="primary" onclick="document.getElementById('material').scrollIntoView({behavior:'smooth'})">Start studying ↓</button>
+</section>
 
-  <section class="card" id="material">
-    <h2>📄 Your study material</h2>
-    <div class="upload">
-      <strong>Choose a text file</strong>
-      <p class="muted">Upload a TXT or Markdown file, or paste your notes below.</p>
-      <input type="file" id="file" accept=".txt,.md,.text">
-      <button onclick="sample()">Try sample notes</button>
-    </div>
-    <label for="source"><strong>Paste or edit your notes</strong></label>
-    <textarea id="source" placeholder="Paste your chapter, class notes or study material here..."></textarea>
-    <button class="primary" onclick="prepare()">Prepare study material</button>
-    <span id="status" class="muted"></span>
-  </section>
+<section class="card" id="material">
+<h2>📄 Your study material</h2>
+<div class="upload">
+<strong>Upload your PDF</strong>
+<p class="muted">PDF files only. Your document is processed in your browser.</p>
+<input type="file" id="file" accept=".pdf,application/pdf">
+</div>
+<button class="primary" id="prepareBtn" disabled>Upload a PDF first</button>
+<span id="status" class="muted" role="status"></span>
+<div id="notice" class="notice hidden"></div>
+</section>
 
-  <nav class="tabs">
-    <button class="tab active" data-page="summary">Summary</button>
-    <button class="tab" data-page="topics">Key topics</button>
-    <button class="tab" data-page="questions">Questions</button>
-    <button class="tab" data-page="flashcards">Flashcards</button>
-    <button class="tab" data-page="quiz">Practice quiz</button>
-  </nav>
+<nav class="tabs">
+<button class="tab active" data-page="summary">Summary</button>
+<button class="tab" data-page="topics">Key topics</button>
+<button class="tab" data-page="questions">Questions</button>
+<button class="tab" data-page="flashcards">Flashcards</button>
+<button class="tab" data-page="quiz">Practice quiz</button>
+</nav>
 
-  <section id="summary" class="page grid">
-    <article class="card"><h2>📝 Quick summary</h2><div id="summaryOut" class="output muted">Load sample notes or add your own material to begin.</div></article>
-    <article class="card"><h2>📚 Study assistant</h2><p class="muted">Select a topic from your notes and use the material to make your own revision plan.</p><button onclick="copySummary()">Copy summary</button></article>
-  </section>
+<section id="summary" class="page grid">
+<article class="card">
+<h2>📝 Quick summary</h2>
+<div id="summaryOut" class="output muted">Upload a PDF to begin.</div>
+</article>
+<article class="card">
+<h2>📚 Study assistant</h2>
+<p class="muted">Use the generated material to revise. Compare it with your original document.</p>
+<button onclick="copySummary()">Copy summary</button>
+</article>
+</section>
 
-  <section id="topics" class="page hidden">
-    <article class="card"><h2>⭐ Key topics</h2><p class="muted">Topics are estimated from repeated words in your material, not from your official exam syllabus.</p><div id="topicsOut" class="output muted">Your key topics will appear here.</div></article>
-  </section>
+<section id="topics" class="page hidden">
+<article class="card">
+<h2>⭐ Key topics</h2>
+<p class="muted">Topics are estimated from repeated words, not your official exam syllabus.</p>
+<div id="topicsOut" class="output muted">Upload a PDF to begin.</div>
+</article>
+</section>
 
-  <section id="questions" class="page hidden">
-    <article class="card"><h2>❓ Revision questions</h2><p class="muted">Use these prompts to test your understanding.</p><div id="questionsOut" class="output muted">Your questions will appear here.</div></article>
-  </section>
+<section id="questions" class="page hidden">
+<article class="card">
+<h2>❓ Revision questions</h2>
+<p class="muted">These questions are generated from extracted sentences and may need editing.</p>
+<div id="questionsOut" class="output muted">Upload a PDF to begin.</div>
+</article>
+</section>
 
-  <section id="flashcards" class="page hidden">
-    <article class="card"><h2>🗂️ Flashcards</h2><p class="muted">Use each card to revise a key term or topic.</p>
-      <div class="flash" id="flash">Prepare your notes to create flashcards.</div>
-      <button onclick="prevCard()">← Previous</button>
-      <button class="primary" onclick="flipCard()">Flip card</button>
-      <button onclick="nextCard()">Next →</button>
-      <p id="flashCount" class="muted"></p>
-    </article>
-  </section>
+<section id="flashcards" class="page hidden">
+<article class="card">
+<h2>🗂️ Flashcards</h2>
+<p class="muted">Revise key terms from your document.</p>
+<div class="flash" id="flash">Upload a PDF to create flashcards.</div>
+<button onclick="prevCard()">← Previous</button>
+<button class="primary" onclick="flipCard()">Flip card</button>
+<button onclick="nextCard()">Next →</button>
+<p id="flashCount" class="muted"></p>
+</article>
+</section>
 
-  <section id="quiz" class="page hidden">
-    <article class="card"><h2>🎯 Practice quiz</h2><p class="muted">Answer using your study material.</p><div id="quizOut">Prepare your notes to create a practice quiz.</div></article>
-  </section>
+<section id="quiz" class="page hidden">
+<article class="card">
+<h2>🎯 Practice quiz</h2>
+<p class="muted">Choose the statement taken from your notes.</p>
+<div id="quizOut">Upload a PDF to create a quiz.</div>
+</article>
+</section>
 </main>
-<footer>StudyLens · Your documents, organised for learning<br>Review generated study material against your original notes.</footer>
+
+<footer>
+StudyLens · Your documents, organised for learning<br>
+PDF-only upload · PDF.js is loaded from a public CDN. Internet is required to load the PDF reader.
+</footer>
 
 <script>
 const $=id=>document.getElementById(id);
 let cards=[],cardIndex=0,flipped=false,quizItems=[],quizIndex=0,score=0;
 
-const sampleText=`Computer Networks
+function showNotice(message){
+  $('notice').textContent=message;
+  $('notice').classList.remove('hidden');
+}
+function hideNotice(){
+  $('notice').textContent='';
+  $('notice').classList.add('hidden');
+}
 
-A computer network is a collection of interconnected devices that communicate and share resources.
+async function loadPdfJs(){
+  if(window.pdfjsLib)return window.pdfjsLib;
+  await new Promise((resolve,reject)=>{
+    const script=document.createElement('script');
+    script.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    script.onload=resolve;
+    script.onerror=()=>reject(new Error('Could not load PDF reader. Check your internet connection.'));
+    document.head.appendChild(script);
+  });
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc=
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  return window.pdfjsLib;
+}
 
-A LAN, or Local Area Network, connects devices within a limited area such as a home, office or college. LANs commonly provide high-speed communication.
+$('file').addEventListener('change',async event=>{
+  const file=event.target.files[0];
+  if(!file)return;
 
-A WAN, or Wide Area Network, connects devices over large geographical areas. The Internet is a well-known example of a WAN.
+  hideNotice();
 
-A network protocol is a set of rules that controls communication between devices. TCP/IP is a widely used protocol suite.
+  if(file.type!=='application/pdf' &&
+     !file.name.toLowerCase().endsWith('.pdf')){
+    event.target.value='';
+    showNotice('PDF files only. Please select a .pdf document.');
+    return;
+  }
 
-An IP address identifies a device on a network. A MAC address is a hardware address associated with a network interface.
+  $('status').textContent=' Reading PDF...';
+  $('prepareBtn').disabled=true;
 
-A router forwards data between different networks. A switch connects devices within a local network.`;
+  try{
+    const pdfjs=await loadPdfJs();
+    const data=new Uint8Array(await file.arrayBuffer());
+    const pdf=await pdfjs.getDocument({data}).promise;
+    let text='';
 
-function sample(){$('source').value=sampleText;prepare()}
+    for(let pageNumber=1;pageNumber<=pdf.numPages;pageNumber++){
+      const page=await pdf.getPage(pageNumber);
+      const content=await page.getTextContent();
+      const pageText=content.items.map(item=>item.str).join(' ');
+      text+='\n\n'+pageText;
+    }
 
-$('file').addEventListener('change',async e=>{
- const f=e.target.files[0];if(!f)return;
- if(!/\.(txt|md|text)$/i.test(f.name)){alert('This version supports TXT and Markdown files. For PDFs, images and Word documents, text extraction needs to be added.');e.target.value='';return}
- $('source').value=await f.text();prepare();
+    text=text.trim();
+
+    if(!text){
+      showNotice('No selectable text was found. This may be a scanned PDF. OCR is not included in this version.');
+      $('status').textContent='';
+      return;
+    }
+
+    prepare(text);
+    $('status').textContent=' ✓ PDF read successfully.';
+  }catch(error){
+    showNotice(error.message||'Could not read this PDF. Please try another PDF.');
+    $('status').textContent='';
+  }finally{
+    $('prepareBtn').disabled=false;
+    $('prepareBtn').textContent='Prepare study material';
+  }
 });
 
-function sentences(text){return (text.match(/[^.!?\n]+[.!?]?/g)||[]).map(s=>s.trim()).filter(s=>s.length>20)}
-function words(text){return (text.toLowerCase().match(/[a-z][a-z-]{2,}/g)||[])}
-const stop=new Set(('the and for are but not you all any can had her was one our out has have from this that with into they their there about which when what your also such than then them these those been being were will would should could may might using used use each other more most very some many much over under between within through across based into').split(' '));
+$('prepareBtn').addEventListener('click',()=>{
+  if(!$('summaryOut').textContent ||
+     $('summaryOut').textContent==='Upload a PDF to begin.'){
+    showNotice('Please upload a PDF first.');
+  }
+});
 
-function prepare(){
- const text=$('source').value.trim();
- if(!text){alert('Please paste notes or load the sample first.');return}
- const ss=sentences(text);
- const terms=words(text).filter(w=>!stop.has(w));
- const freq={};terms.forEach(w=>freq[w]=(freq[w]||0)+1);
- const ranked=Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,10);
- const summary=ss.length>0?ss.slice(0,Math.max(2,Math.ceil(ss.length*.35))).join(' '):text.slice(0,700);
- $('summaryOut').textContent=summary;
- $('topicsOut').textContent=ranked.length?ranked.map(([w,n],i)=>`${i+1}. ${w} (${n} mentions)`).join('\n'):'Not enough text to identify repeated terms.';
- const chunks=ss.length?ss:[text];
- $('questionsOut').textContent=chunks.slice(0,12).map((s,i)=>`${i+1}. Explain in your own words: ${s.replace(/[.!?]$/,'')}.`).join('\n\n');
- cards=(ranked.length?ranked.slice(0,10).map(([w])=>({front:`What should you revise about "${w}"?`,back:ss.find(s=>s.toLowerCase().includes(w))||`Review the term "${w}" in your original notes.`})):chunks.slice(0,6).map(s=>({front:'Explain this idea in your own words.',back:s})));
- cardIndex=0;flipped=false;showCard();
- quizItems=chunks.slice(0,5).map(s=>({q:'Which statement appears in your notes?',options:[s,'None of these statements appears in your notes.'],answer:0}));
- quizIndex=0;score=0;showQuiz();
- $('status').textContent=' ✓ Study material prepared from your text.';
+function sentences(text){
+  return (text.match(/[^.!?\n]+[.!?]?/g)||[])
+    .map(s=>s.trim()).filter(s=>s.length>20);
 }
-function showCard(){if(!cards.length)return;$('flash').textContent=flipped?cards[cardIndex].back:cards[cardIndex].front;$('flashCount').textContent=`Card ${cardIndex+1} of ${cards.length}`}
-function flipCard(){if(!cards.length)return;flipped=!flipped;showCard()}
-function nextCard(){if(!cards.length)return;cardIndex=(cardIndex+1)%cards.length;flipped=false;showCard()}
-function prevCard(){if(!cards.length)return;cardIndex=(cardIndex-1+cards.length)%cards.length;flipped=false;showCard()}
+function words(text){
+  return text.toLowerCase().match(/[a-z][a-z-]{2,}/g)||[];
+}
+const stop=new Set(('the and for are but not you all any can had her was one our out has have from this that with into they their there about which when what your also such than then them these those been being were will would should could may might using used use each other more most very some many much over under between within through across based').split(' '));
+
+function prepare(text){
+  const ss=sentences(text);
+  const terms=words(text).filter(word=>!stop.has(word));
+  const frequency={};
+
+  terms.forEach(word=>{
+    frequency[word]=(frequency[word]||0)+1;
+  });
+
+  const ranked=Object.entries(frequency)
+    .sort((a,b)=>b[1]-a[1]).slice(0,10);
+
+  const summary=ss.length
+    ?ss.slice(0,Math.max(2,Math.ceil(ss.length*.35))).join(' ')
+    :text.slice(0,700);
+
+  $('summaryOut').textContent=summary;
+
+  $('topicsOut').textContent=ranked.length
+    ?ranked.map(([word,count],i)=>`${i+1}. ${word} (${count} mentions)`).join('\n')
+    :'Not enough text to identify repeated terms.';
+
+  const chunks=ss.length?ss:[text];
+
+  $('questionsOut').textContent=chunks.slice(0,12)
+    .map((sentence,i)=>`${i+1}. Explain in your own words: ${sentence.replace(/[.!?]$/,'')}.`)
+    .join('\n\n');
+
+  cards=ranked.length
+    ?ranked.slice(0,10).map(([word])=>({
+      front:`What should you revise about "${word}"?`,
+      back:ss.find(s=>s.toLowerCase().includes(word))||`Review "${word}" in your original notes.`
+    }))
+    :chunks.slice(0,6).map(sentence=>({
+      front:'Explain this idea in your own words.',
+      back:sentence
+    }));
+
+  cardIndex=0;
+  flipped=false;
+  showCard();
+
+  quizItems=chunks.slice(0,5).map(sentence=>({
+    q:'Which statement appears in your notes?',
+    options:[sentence,'None of these statements appears in your notes.'],
+    answer:0
+  }));
+
+  quizIndex=0;
+  score=0;
+  showQuiz();
+}
+
+function showCard(){
+  if(!cards.length)return;
+  $('flash').textContent=flipped?cards[cardIndex].back:cards[cardIndex].front;
+  $('flashCount').textContent=`Card ${cardIndex+1} of ${cards.length}`;
+}
+function flipCard(){
+  if(!cards.length)return;
+  flipped=!flipped;
+  showCard();
+}
+function nextCard(){
+  if(!cards.length)return;
+  cardIndex=(cardIndex+1)%cards.length;
+  flipped=false;
+  showCard();
+}
+function prevCard(){
+  if(!cards.length)return;
+  cardIndex=(cardIndex-1+cards.length)%cards.length;
+  flipped=false;
+  showCard();
+}
+
 function showQuiz(){
- if(!quizItems.length){$('quizOut').textContent='Prepare your notes first.';return}
- if(quizIndex>=quizItems.length){$('quizOut').innerHTML=`<h3>Quiz complete!</h3><p>Your score: ${score} / ${quizItems.length}</p><button onclick="quizIndex=0;score=0;showQuiz()">Try again</button>`;return}
- const item=quizItems[quizIndex];
- $('quizOut').innerHTML=`<p><strong>Question ${quizIndex+1} of ${quizItems.length}</strong></p><p></p>`;
- const q=document.createElement('p');q.textContent=item.q;$('quizOut').append(q);
- item.options.forEach((option,i)=>{const b=document.createElement('button');b.style.display='block';b.style.margin='8px 0';b.style.width='100%';b.textContent=option;b.onclick=()=>{if(i===item.answer)score++;quizIndex++;showQuiz()};$('quizOut').append(b)});
+  if(!quizItems.length)return;
+
+  const container=$('quizOut');
+  container.replaceChildren();
+
+  if(quizIndex>=quizItems.length){
+    const heading=document.createElement('h3');
+    heading.textContent='Quiz complete!';
+    const result=document.createElement('p');
+    result.textContent=`Your score: ${score} / ${quizItems.length}`;
+    const retry=document.createElement('button');
+    retry.textContent='Try again';
+    retry.onclick=()=>{quizIndex=0;score=0;showQuiz();};
+    container.append(heading,result,retry);
+    return;
+  }
+
+  const item=quizItems[quizIndex];
+  const label=document.createElement('p');
+  label.textContent=`Question ${quizIndex+1} of ${quizItems.length}`;
+  const question=document.createElement('p');
+  question.textContent=item.q;
+  container.append(label,question);
+
+  item.options.forEach((option,index)=>{
+    const button=document.createElement('button');
+    button.style.display='block';
+    button.style.margin='8px 0';
+    button.style.width='100%';
+    button.textContent=option;
+    button.onclick=()=>{
+      if(index===item.answer)score++;
+      quizIndex++;
+      showQuiz();
+    };
+    container.append(button);
+  });
 }
-function copySummary(){const text=$('summaryOut').textContent;if(!text){return}navigator.clipboard?.writeText(text).then(()=>alert('Summary copied!')).catch(()=>alert(text))}
-document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
- document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));b.classList.add('active');
- document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));$(b.dataset.page).classList.remove('hidden');
-}));
+
+function copySummary(){
+  const text=$('summaryOut').textContent;
+  if(!text)return;
+
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text)
+      .then(()=>alert('Summary copied!'))
+      .catch(()=>alert(text));
+  }else{
+    alert(text);
+  }
+}
+
+document.querySelectorAll('.tab').forEach(button=>{
+  button.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(tab=>tab.classList.remove('active'));
+    button.classList.add('active');
+    document.querySelectorAll('.page').forEach(page=>page.classList.add('hidden'));
+    $(button.dataset.page).classList.remove('hidden');
+  });
+});
 </script>
 </body>
 </html>
